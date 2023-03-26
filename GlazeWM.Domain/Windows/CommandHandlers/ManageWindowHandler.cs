@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using GlazeWM.Domain.Common.Utils;
 using GlazeWM.Domain.Containers;
 using GlazeWM.Domain.Containers.Commands;
@@ -71,6 +72,11 @@ namespace GlazeWM.Domain.Windows.CommandHandlers
 
       // Run matching window rules.
       var windowRules = _userConfigService.GetMatchingWindowRules(window);
+      var path = Path.Combine(
+          Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+          "./.glaze-wm/manage_window.log"
+        );
+      File.AppendAllText(path, "Managing window: process=" + window.ProcessName + " title=" + window.Title + " class=" + window.ClassName + "\n");
       _bus.Invoke(new RunWindowRulesCommand(window, windowRules));
 
       // Update window in case the reference changes.
