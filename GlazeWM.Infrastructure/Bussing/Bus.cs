@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -16,7 +17,10 @@ namespace GlazeWM.Infrastructure.Bussing
     public readonly Queue<Command> CommandHistory = new();
     public readonly object LockObj = new();
     private readonly ILogger<Bus> _logger;
-
+    private readonly string logPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "./.glaze-wm/event-bus.log"
+              );
     public Bus(ILogger<Bus> logger)
     {
       _logger = logger;
@@ -30,7 +34,7 @@ namespace GlazeWM.Infrastructure.Bussing
       lock (LockObj)
       {
         _logger.LogDebug("Command {CommandName} invoked.", command.Name);
-
+        File.AppendAllText(logPath, $"Command {command.Name} invoked.\n");
         CommandHistory.Enqueue(command);
 
         // Maintain a history of the last 15 command invocations for debugging.
