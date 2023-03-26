@@ -93,10 +93,15 @@ namespace GlazeWM.Domain.UserConfigs
           ? new IgnoreWindowCommand(subjectContainer as Window)
           : new NoopCommand(),
         "binding" => ParseBindingCommand(commandParts),
+        "dump" => ParseDumpCommand(),
         _ => throw new ArgumentException(null, nameof(commandString)),
       };
     }
 
+    private static Command ParseDumpCommand()
+    {
+      return new DumpCommand();
+    }
     private static Command ParseTilingCommand(string[] commandParts, Container subjectContainer)
     {
       return commandParts[1] switch
