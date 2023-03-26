@@ -1,4 +1,5 @@
 using System.Linq;
+using GlazeWM.Domain.Common.Commands;
 using GlazeWM.Domain.Containers;
 using GlazeWM.Domain.Containers.Commands;
 using GlazeWM.Domain.Containers.Events;
@@ -6,6 +7,7 @@ using GlazeWM.Domain.Monitors;
 using GlazeWM.Domain.UserConfigs;
 using GlazeWM.Domain.Workspaces.Commands;
 using GlazeWM.Infrastructure.Bussing;
+using GlazeWM.Domain.Windows;
 
 namespace GlazeWM.Domain.Workspaces.CommandHandlers
 {
@@ -81,6 +83,14 @@ namespace GlazeWM.Domain.Workspaces.CommandHandlers
       if (workspaceToDestroy != null)
         _bus.Invoke(new DeactivateWorkspaceCommand(workspaceToDestroy));
 
+      var activeWindows = workspaceToFocus.ChildrenOfType<Window>().ToList();
+      foreach (var defaultProcess in _userConfigService.GetWorkspaceConfigByName(workspaceName).DefaultProcesses)
+      {
+        if (!activeWindows.Any((window) => (window as Window).ProcessName == defaultProcess.MatchProcessName))
+        {
+          _bus.Invoke(new ExecProcessCommand(defaultProcess.ExecCommand, new System.Collections.Generic.List<string>()));
+        }
+      }
       return CommandResponse.Ok;
     }
 
